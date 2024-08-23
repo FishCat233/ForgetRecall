@@ -213,6 +213,33 @@ def recall_task_func(argv):
     return
 
 
+def help_func(argv: List[str]) -> None:
+    """
+    帮助函数
+    :return:
+    """
+    if argv == 'list':
+        logging.info("forgetrecall list [任务序号] [任务名字]")
+    elif argv == 'add':
+        logging.info("forgetrecall add <任务名字> <任务描述> <间隔天数>")
+    elif argv == 'delete':
+        logging.info("forgetrecall delete <任务序号>")
+    elif argv == 'update':
+        logging.info("forgetrecall update <任务序号> [任务名字] [任务描述] [间隔天数]")
+    elif argv == 'recall':
+        logging.info("forgetrecall recall <todo序号>")
+    elif argv == 'query':
+        logging.info("forgetrecall query [任务名字]")
+    else:
+        logging.info("forgetrecall list [任务序号] [任务名字]\n"
+                     "forgetrecall add <任务名字> <任务描述> <间隔天数>\n"
+                     "forgetrecall delete <任务序号>\n"
+                     "forgetrecall update <任务序号> [任务名字] [任务描述] [间隔天数]\n"
+                     "forgetrecall recall <todo序号>\n"
+                     "forgetrecall query <任务名字>")
+    return
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
 
@@ -235,6 +262,8 @@ if __name__ == '__main__':
         recall_task_func(argv[2:])
     elif action == "query":
         query_task_by_name_func(argv[2:])
+    elif action == "help":
+        help_func(argv[2:])
 
     task_status_update()
 
