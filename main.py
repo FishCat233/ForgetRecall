@@ -55,6 +55,10 @@ def query_task_by_name_func(argv: List[str]) -> None:
     :param argv: forgetrecall query <任务名>
     :return:
     """
+    # 如果没有参数，则查询所有未完成的task，并进行格式化输出
+    if len(argv) == 0:
+        query_task_func()
+        return
     # 查询tasklist中任务名包含argv[0]的任务，并进行格式化输出
     tasks = cur.execute("SELECT * FROM tasklist WHERE taskName LIKE ?", (f"%{argv[0]}%",)).fetchall()
     for task in tasks:
@@ -62,10 +66,9 @@ def query_task_by_name_func(argv: List[str]) -> None:
     return
 
 
-def query_task_func(argv: List[str]) -> None:
+def query_task_func() -> None:
     """
     查询任务
-    :param argv: forgetrecall query
     :return:
     """
     # 查询所有未完成的task，并进行格式化输出
@@ -136,6 +139,7 @@ def del_task_func(argv):
 
     # 删除task
     cur.execute("DELETE FROM tasklist WHERE taskNO = ?", (task_no,))
+    conn.commit()
     logging.info(f"任务 {task_no} 删除成功")
     return
 
@@ -143,7 +147,7 @@ def del_task_func(argv):
 def update_task_func(argv: List[str]) -> None:
     """
     修改任务
-    :param argv: forgetrecall update <任务序号> [任务描述] [间隔天数]
+    :param argv: forgetrecall update <任务序号> [任务名字] [任务描述] [间隔天数]
     :return:
     """
     # 根据任务序号找到要修改的task，修改对应task的描述，并删除task下所有未完成的todos，按照新日期重新插入todos
@@ -156,10 +160,15 @@ def update_task_func(argv: List[str]) -> None:
         logging.error(f"任务 {task_no} 修改失败，缺少参数")
         return
 
+    # 修改task的名字
+    task_name = argv.pop(0)
+    if task_name != 'KEEP':
+        cur.execute("UPDATE tasklist SET taskName = ? WHERE taskNO = ?", (task_name, task[0]))
+
     # 修改task的描述
     task_decs = argv.pop(0)
     if task_decs != 'KEEP':
-        cur.execute("UPDATE tasklist SET taskDesc = ? WHERE taskNO = ?", (argv[1], task[0]))
+        cur.execute("UPDATE tasklist SET taskDesc = ? WHERE taskNO = ?", (task_decs, task[0]))
 
     # 删除原来未完成的todos，重新添加未完成的todos
     task_interval = argv
